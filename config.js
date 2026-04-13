@@ -4,7 +4,7 @@
  * For local development, it falls back to localhost:5000.
  */
 const CONFIG = {
-    BACKEND_URL: "%%BACKEND_URL%%"
+    BACKEND_URL: "https://hotel-management-system-production-d4e9.up.railway.app"
 };
 
 // Fallback to localhost for development
