@@ -2,16 +2,21 @@
 # Run this file once to set up your entire database
 # Command: python database.py
 
+import os
 import mysql.connector
+from dotenv import load_dotenv
 from werkzeug.security import generate_password_hash
 
+# Load .env file for local development
+load_dotenv()
+
 # ─────────────────────────────────────────
-#  DB CONFIG — change password to yours
+#  DB CONFIG — Read from Environment Variables
 # ─────────────────────────────────────────
 config = {
-    "host": "localhost",
-    "user": "root",
-    "password": "123456",   # 👈 change this to your MySQL password
+    "host": os.getenv("MYSQL_HOST", "localhost"),
+    "user": os.getenv("MYSQL_USER", "root"),
+    "password": os.getenv("MYSQL_PASSWORD", ""),
 }
 
 try:
@@ -25,9 +30,10 @@ except Exception as e:
 # ─────────────────────────────────────────
 #  1. CREATE DATABASE
 # ─────────────────────────────────────────
-cursor.execute("CREATE DATABASE IF NOT EXISTS hotel_management")
-cursor.execute("USE hotel_management")
-print("✅ Database ready.")
+db_name = os.getenv("MYSQL_DB", "hotel_management")
+cursor.execute(f"CREATE DATABASE IF NOT EXISTS {db_name}")
+cursor.execute(f"USE {db_name}")
+print(f"✅ Database {db_name} ready.")
 
 # ─────────────────────────────────────────
 #  2. CREATE TABLES
