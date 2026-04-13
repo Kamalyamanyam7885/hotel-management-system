@@ -4,9 +4,10 @@ Single Flask app with NO blueprints, NO subfolders
 Raw MySQL queries using mysql-connector-python
 """
 
-from flask import Flask, render_template, request, redirect, url_for, session, flash
+from flask import Flask, render_template, request, redirect, url_for, session, flash, jsonify
 import mysql.connector
 from mysql.connector import Error
+from flask_cors import CORS
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime, date, timedelta
 from functools import wraps
@@ -20,6 +21,14 @@ app = Flask(__name__,
     static_folder=os.path.join(BASE_DIR, 'static')
 )
 app.secret_key = SECRET_KEY
+
+# CORS — allow Vercel frontend and localhost for dev
+ALLOWED_ORIGINS = [
+    "http://localhost:5000",
+    "http://127.0.0.1:5000",
+    os.environ.get("FRONTEND_URL", "https://your-app.vercel.app"),
+]
+CORS(app, origins=ALLOWED_ORIGINS, supports_credentials=True)
 
 # ---------------- DATABASE CONNECTION ----------------
 def get_db():
@@ -44,6 +53,12 @@ def login_required(role=None):
             return f(*args, **kwargs)
         return decorated_function
     return decorator
+
+# ---------------- HEALTH CHECK ----------------
+@app.route('/api/health', methods=['GET'])
+def health_check():
+    """Health check endpoint for monitoring."""
+    return jsonify({"status": "ok", "message": "Hotel Management System is running"}), 200
 
 # ---------------- AUTH ROUTES ----------------
 @app.route('/')
@@ -689,4 +704,6 @@ def cancel_booking(id):
     return redirect(url_for('my_bookings'))
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    port = int(os.environ.get('PORT', 5000))
+    debug_mode = os.environ.get('FLASK_ENV', 'development') == 'development'
+    app.run(host='0.0.0.0', port=port, debug=debug_mode)

@@ -1,3 +1,9 @@
-Flask
-mysql-connector-python
+flask
+flask-cors
+flask-socketio
+PyMySQL
+python-dotenv
+PyJWT
+gunicorn
+flask-limiter
 werkzeug
