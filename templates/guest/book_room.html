@@ -1,0 +1,64 @@
+{% extends "base.html" %}
+
+{% block content %}
+{% set room_images = {'Single': 'single.png', 'Double': 'double.png', 'Deluxe': 'deluxe.png', 'Suite': 'suite.png'} %}
+<div class="main-content" style="max-width: 800px; margin: 0 auto;">
+    <div style="border-radius: 10px; overflow: hidden; margin-bottom: 2rem; position: relative;">
+        <img src="{{ url_for('static', filename='images/rooms/' + room_images.get(room.type, 'single.png')) }}" alt="{{ room.type }} Room" style="width: 100%; height: 250px; object-fit: cover; display: block;">
+        <div style="position: absolute; bottom: 0; left: 0; right: 0; background: linear-gradient(transparent, rgba(10,22,40,0.95)); padding: 2rem; display: flex; justify-content: space-between; align-items: flex-end;">
+            <div>
+                <h2 style="color: var(--gold); margin: 0;">Confirm Your Stay</h2>
+                <p style="color: white; margin: 0.3rem 0 0 0;">{{ room.type }} Room #{{ room.room_number }}</p>
+            </div>
+            <div style="text-align: right;">
+                <p style="font-size: 1.5rem; font-weight: 700; color: var(--gold); margin: 0;">₹{{ room.price }}</p>
+                <p style="font-size: 0.8rem; color: rgba(255,255,255,0.8); margin: 0;">per night</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="card" style="max-width: 100%;">
+        <form action="/guest/book/{{ room.id }}" method="POST">
+            <input type="hidden" id="price_per_night" value="{{ room.price }}">
+            
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label>Check-in Date</label>
+                    <input type="date" name="check_in" id="check_in" required>
+                </div>
+                <div class="form-group">
+                    <label>Check-out Date</label>
+                    <input type="date" name="check_out" id="check_out" required>
+                </div>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px;">
+                <div class="form-group">
+                    <label>Number of Guests</label>
+                    <input type="number" name="num_guests" min="1" max="{{ room.max_guests }}" value="1" required>
+                </div>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <select name="payment_method" required>
+                        <option value="online">Online Payment</option>
+                        <option value="card">Credit/Debit Card</option>
+                        <option value="upi">UPI / Scanner</option>
+                        <option value="cash">Pay at Hotel (Cash)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label>Special Requests</label>
+                <textarea name="special_request" rows="3" placeholder="Any special requirements (e.g. late check-in, extra bed)..."></textarea>
+            </div>
+
+            <div id="total_amount_display" style="background: #f9f9f9; padding: 1.5rem; border-radius: 5px; text-align: center; margin: 1.5rem 0; font-size: 1.2rem; font-weight: 700; color: var(--navy); border: 1px dashed var(--gold);">
+                Select dates to see total price
+            </div>
+
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem;">Confirm Booking</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,456 @@
+{% extends "base.html" %}
+
+{% block content %}
+<style>
+    .receipt-wrapper {
+        max-width: 800px;
+        margin: 2rem auto;
+        padding: 0 1rem;
+    }
+    .receipt-actions {
+        display: flex;
+        gap: 12px;
+        margin-bottom: 1.5rem;
+        justify-content: flex-end;
+    }
+    .receipt-actions .btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-size: 0.9rem;
+    }
+    .receipt-container {
+        background: white;
+        border-radius: 12px;
+        box-shadow: 0 8px 30px rgba(0,0,0,0.1);
+        overflow: hidden;
+        position: relative;
+    }
+    .receipt-header {
+        background: linear-gradient(135deg, var(--navy) 0%, #1a2d4a 100%);
+        padding: 2.5rem 2.5rem 2rem;
+        color: white;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+    }
+    .receipt-hotel-name {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--gold);
+        letter-spacing: 2px;
+    }
+    .receipt-hotel-name span {
+        color: white;
+    }
+    .receipt-hotel-tagline {
+        font-size: 0.8rem;
+        opacity: 0.7;
+        margin-top: 4px;
+        letter-spacing: 3px;
+        text-transform: uppercase;
+    }
+    .receipt-title-box {
+        text-align: right;
+    }
+    .receipt-title-box h2 {
+        font-size: 1.3rem;
+        color: var(--gold);
+        margin-bottom: 4px;
+    }
+    .receipt-title-box .receipt-id {
+        font-size: 0.85rem;
+        opacity: 0.8;
+    }
+    .receipt-title-box .receipt-date {
+        font-size: 0.8rem;
+        opacity: 0.6;
+        margin-top: 2px;
+    }
+    .receipt-status-bar {
+        padding: 0.8rem 2.5rem;
+        text-align: center;
+        font-weight: 600;
+        font-size: 0.85rem;
+        letter-spacing: 1px;
+        text-transform: uppercase;
+    }
+    .receipt-status-confirmed {
+        background: linear-gradient(90deg, #1b5e20, #2e7d32, #1b5e20);
+        color: #c8e6c9;
+    }
+    .receipt-status-pending {
+        background: linear-gradient(90deg, #e65100, #ef6c00, #e65100);
+        color: #ffe0b2;
+    }
+    .receipt-status-cancelled {
+        background: linear-gradient(90deg, #b71c1c, #c62828, #b71c1c);
+        color: #ffcdd2;
+    }
+    .receipt-body {
+        padding: 2.5rem;
+    }
+    .receipt-section {
+        margin-bottom: 2rem;
+    }
+    .receipt-section-title {
+        font-size: 0.75rem;
+        text-transform: uppercase;
+        letter-spacing: 2px;
+        color: #999;
+        margin-bottom: 0.8rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 1px solid #eee;
+        font-weight: 600;
+    }
+    .receipt-grid {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1rem;
+    }
+    .receipt-field {
+        margin-bottom: 0.3rem;
+    }
+    .receipt-field .label {
+        font-size: 0.78rem;
+        color: #999;
+        margin-bottom: 2px;
+    }
+    .receipt-field .value {
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: var(--navy);
+    }
+    .receipt-divider {
+        height: 1px;
+        background: linear-gradient(90deg, transparent, #ddd, transparent);
+        margin: 1.5rem 0;
+    }
+    .price-breakdown {
+        background: #f8f9fa;
+        border-radius: 8px;
+        padding: 1.5rem;
+    }
+    .price-row {
+        display: flex;
+        justify-content: space-between;
+        padding: 0.5rem 0;
+        font-size: 0.9rem;
+        color: #555;
+    }
+    .price-row.total {
+        border-top: 2px solid var(--navy);
+        margin-top: 0.5rem;
+        padding-top: 1rem;
+        font-size: 1.15rem;
+        font-weight: 700;
+        color: var(--navy);
+    }
+    .price-row.total .amount {
+        color: var(--gold);
+    }
+    .receipt-stamp {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%) rotate(-25deg);
+        font-size: 4.5rem;
+        font-weight: 900;
+        text-transform: uppercase;
+        opacity: 0.04;
+        color: var(--navy);
+        pointer-events: none;
+        white-space: nowrap;
+        letter-spacing: 10px;
+    }
+    .receipt-footer {
+        background: #f8f9fa;
+        padding: 1.5rem 2.5rem;
+        text-align: center;
+        font-size: 0.8rem;
+        color: #999;
+        border-top: 1px solid #eee;
+    }
+    .receipt-footer .hotel-contact {
+        margin-bottom: 0.5rem;
+        color: #777;
+    }
+    .receipt-qr {
+        text-align: center;
+        margin-top: 1rem;
+    }
+    .receipt-qr img {
+        width: 100px;
+        height: 100px;
+        opacity: 0.8;
+    }
+    .receipt-qr p {
+        font-size: 0.7rem;
+        color: #aaa;
+        margin-top: 4px;
+    }
+
+    /* Print Styles */
+    @media print {
+        body * { visibility: hidden; }
+        .receipt-container, .receipt-container * { visibility: visible; }
+        .receipt-container {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 100%;
+            box-shadow: none;
+            border-radius: 0;
+        }
+        .receipt-actions, nav, footer, .flash-container { display: none !important; }
+        .receipt-stamp { opacity: 0.06; }
+    }
+</style>
+
+<div class="receipt-wrapper">
+    <div class="receipt-actions">
+        <a href="/guest/mybookings" class="btn btn-outline" style="padding: 8px 20px;">← Back to Bookings</a>
+        <button onclick="window.print()" class="btn btn-primary" style="padding: 8px 20px;">🖨️ Print Receipt</button>
+        <button onclick="downloadPDF()" class="btn btn-primary" style="padding: 8px 20px; background: var(--navy); color: var(--gold);">📄 Download PDF</button>
+    </div>
+
+    <div class="receipt-container" id="receiptContent">
+        <!-- Watermark Stamp -->
+        <div class="receipt-stamp">
+            {% if booking.status == 'confirmed' and booking.payment_status == 'paid' %}
+                PAID
+            {% elif booking.status == 'cancelled' %}
+                CANCELLED
+            {% else %}
+                PENDING
+            {% endif %}
+        </div>
+
+        <!-- Header -->
+        <div class="receipt-header">
+            <div>
+                <div class="receipt-hotel-name">HOTEL<span>GRAND</span></div>
+                <div class="receipt-hotel-tagline">Luxury & Comfort Personalized</div>
+            </div>
+            <div class="receipt-title-box">
+                <h2>Booking Receipt</h2>
+                <div class="receipt-id">Receipt #HG-{{ '%05d' | format(booking.id) }}</div>
+                <div class="receipt-date">Issued: {{ booking.booked_at.strftime('%d %b %Y, %I:%M %p') if booking.booked_at else 'N/A' }}</div>
+            </div>
+        </div>
+
+        <!-- Status Bar -->
+        <div class="receipt-status-bar {% if booking.status == 'confirmed' and booking.payment_status == 'paid' %}receipt-status-confirmed{% elif booking.status == 'cancelled' %}receipt-status-cancelled{% else %}receipt-status-pending{% endif %}">
+            {% if booking.status == 'confirmed' and booking.payment_status == 'paid' %}
+                ✓ Payment Confirmed — Booking Secured
+            {% elif booking.status == 'cancelled' %}
+                ✗ Booking Cancelled
+            {% else %}
+                ⏳ Payment Pending
+            {% endif %}
+        </div>
+
+        <!-- Body -->
+        <div class="receipt-body">
+
+            <!-- Guest Information -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">Guest Information</div>
+                <div class="receipt-grid">
+                    <div class="receipt-field">
+                        <div class="label">Guest Name</div>
+                        <div class="value">{{ guest.name }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Email</div>
+                        <div class="value">{{ guest.email }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Phone</div>
+                        <div class="value">{{ guest.phone or 'N/A' }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Booking ID</div>
+                        <div class="value">#{{ booking.id }}</div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="receipt-divider"></div>
+
+            <!-- Room & Stay Details -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">Room & Stay Details</div>
+                <div class="receipt-grid">
+                    <div class="receipt-field">
+                        <div class="label">Room Number</div>
+                        <div class="value">{{ booking.room_number }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Room Type</div>
+                        <div class="value">{{ booking.room_type }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Floor</div>
+                        <div class="value">{{ booking.floor }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Number of Guests</div>
+                        <div class="value">{{ booking.num_guests }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Check-in Date</div>
+                        <div class="value" style="color: #2e7d32;">{{ booking.check_in }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Check-out Date</div>
+                        <div class="value" style="color: #c62828;">{{ booking.check_out }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Duration</div>
+                        <div class="value">{{ nights }} Night{{ 's' if nights != 1 else '' }}</div>
+                    </div>
+                    {% if booking.special_request %}
+                    <div class="receipt-field">
+                        <div class="label">Special Requests</div>
+                        <div class="value" style="font-weight: 400; font-size: 0.85rem;">{{ booking.special_request }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if booking.amenities %}
+            <div class="receipt-section" style="margin-bottom: 1rem;">
+                <div class="receipt-section-title">Room Amenities</div>
+                <div style="display: flex; flex-wrap: wrap; gap: 8px;">
+                    {% for amenity in booking.amenities.split(',') %}
+                    <span style="background: #e8f5e9; color: #2e7d32; padding: 4px 12px; border-radius: 20px; font-size: 0.78rem; font-weight: 500;">{{ amenity.strip() }}</span>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="receipt-divider"></div>
+
+            <!-- Payment Details -->
+            <div class="receipt-section">
+                <div class="receipt-section-title">Payment Information</div>
+                <div class="receipt-grid" style="margin-bottom: 1.5rem;">
+                    <div class="receipt-field">
+                        <div class="label">Payment Method</div>
+                        <div class="value" style="text-transform: uppercase;">{{ booking.payment_method or 'N/A' }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Payment Status</div>
+                        <div class="value">
+                            {% if booking.payment_status == 'paid' %}
+                                <span style="color: #2e7d32;">✓ Paid</span>
+                            {% else %}
+                                <span style="color: #e65100;">⏳ {{ booking.payment_status }}</span>
+                            {% endif %}
+                        </div>
+                    </div>
+                    {% if payment %}
+                    <div class="receipt-field">
+                        <div class="label">Transaction ID</div>
+                        <div class="value" style="font-family: monospace; font-size: 0.85rem;">{{ payment.transaction_id or 'N/A' }}</div>
+                    </div>
+                    <div class="receipt-field">
+                        <div class="label">Payment Date</div>
+                        <div class="value">{{ payment.created_at.strftime('%d %b %Y, %I:%M %p') if payment.created_at else 'N/A' }}</div>
+                    </div>
+                    {% endif %}
+                </div>
+
+                <!-- Price Breakdown -->
+                <div class="price-breakdown">
+                    <div class="price-row">
+                        <span>Room Rate ({{ booking.room_type }})</span>
+                        <span>₹{{ "%.2f" | format(price_per_night) }} / night</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Duration</span>
+                        <span>× {{ nights }} night{{ 's' if nights != 1 else '' }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Subtotal</span>
+                        <span>₹{{ "%.2f" | format(booking.total_amount) }}</span>
+                    </div>
+                    <div class="price-row">
+                        <span>Taxes & Fees</span>
+                        <span>Included</span>
+                    </div>
+                    <div class="price-row total">
+                        <span>Total Amount</span>
+                        <span class="amount">₹{{ "%.2f" | format(booking.total_amount) }}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <div class="receipt-footer">
+            <div class="hotel-contact">
+                Hotel Grand | 123 Luxury Avenue, City Center | Phone: +91 98765 43210 | Email: info@hotelgrand.com
+            </div>
+            <p>Thank you for choosing Hotel Grand. We look forward to welcoming you!</p>
+            <p style="margin-top: 0.5rem; font-size: 0.7rem; color: #bbb;">This is a computer-generated receipt and does not require a signature.</p>
+        </div>
+    </div>
+</div>
+
+<script>
+    function downloadPDF() {
+        // Use browser print to PDF functionality
+        const printContents = document.getElementById('receiptContent').innerHTML;
+        const win = window.open('', '_blank');
+        win.document.write(`
+            <html>
+            <head>
+                <title>Receipt #HG-{{ '%05d' | format(booking.id) }} - Hotel Grand</title>
+                <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+                <style>
+                    body { margin: 0; padding: 20px; background: white; font-family: 'Poppins', sans-serif; }
+                    .receipt-container { max-width: 800px; margin: 0 auto; box-shadow: none; }
+                    .receipt-header { background: linear-gradient(135deg, #0a1628 0%, #1a2d4a 100%); padding: 2.5rem; color: white; display: flex; justify-content: space-between; align-items: flex-start; }
+                    .receipt-hotel-name { font-size: 1.8rem; font-weight: 700; color: #c9a84c; letter-spacing: 2px; }
+                    .receipt-hotel-name span { color: white; }
+                    .receipt-hotel-tagline { font-size: 0.8rem; opacity: 0.7; margin-top: 4px; letter-spacing: 3px; text-transform: uppercase; }
+                    .receipt-title-box { text-align: right; }
+                    .receipt-title-box h2 { font-size: 1.3rem; color: #c9a84c; margin: 0 0 4px; }
+                    .receipt-title-box .receipt-id { font-size: 0.85rem; opacity: 0.8; }
+                    .receipt-title-box .receipt-date { font-size: 0.8rem; opacity: 0.6; margin-top: 2px; }
+                    .receipt-status-bar { padding: 0.8rem 2.5rem; text-align: center; font-weight: 600; font-size: 0.85rem; letter-spacing: 1px; text-transform: uppercase; }
+                    .receipt-status-confirmed { background: linear-gradient(90deg, #1b5e20, #2e7d32, #1b5e20); color: #c8e6c9; }
+                    .receipt-status-pending { background: linear-gradient(90deg, #e65100, #ef6c00, #e65100); color: #ffe0b2; }
+                    .receipt-status-cancelled { background: linear-gradient(90deg, #b71c1c, #c62828, #b71c1c); color: #ffcdd2; }
+                    .receipt-body { padding: 2.5rem; }
+                    .receipt-section { margin-bottom: 2rem; }
+                    .receipt-section-title { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 2px; color: #999; margin-bottom: 0.8rem; padding-bottom: 0.5rem; border-bottom: 1px solid #eee; font-weight: 600; }
+                    .receipt-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; }
+                    .receipt-field .label { font-size: 0.78rem; color: #999; margin-bottom: 2px; }
+                    .receipt-field .value { font-size: 0.95rem; font-weight: 600; color: #0a1628; }
+                    .receipt-divider { height: 1px; background: linear-gradient(90deg, transparent, #ddd, transparent); margin: 1.5rem 0; }
+                    .price-breakdown { background: #f8f9fa; border-radius: 8px; padding: 1.5rem; }
+                    .price-row { display: flex; justify-content: space-between; padding: 0.5rem 0; font-size: 0.9rem; color: #555; }
+                    .price-row.total { border-top: 2px solid #0a1628; margin-top: 0.5rem; padding-top: 1rem; font-size: 1.15rem; font-weight: 700; color: #0a1628; }
+                    .price-row.total .amount { color: #c9a84c; }
+                    .receipt-stamp { position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%) rotate(-25deg); font-size: 4.5rem; font-weight: 900; text-transform: uppercase; opacity: 0.06; color: #0a1628; pointer-events: none; white-space: nowrap; letter-spacing: 10px; }
+                    .receipt-footer { background: #f8f9fa; padding: 1.5rem 2.5rem; text-align: center; font-size: 0.8rem; color: #999; border-top: 1px solid #eee; }
+                    .receipt-footer .hotel-contact { margin-bottom: 0.5rem; color: #777; }
+                </style>
+            </head>
+            <body>
+                <div class="receipt-container" style="position: relative;">
+                    ${printContents}
+                </div>
+                <script>
+                    setTimeout(function() { window.print(); window.close(); }, 500);
+                <\/script>
+            </body>
+            </html>
+        `);
+        win.document.close();
+    }
+</script>
+{% endblock %}

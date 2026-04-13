@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="card-container">
+    <div class="card" style="max-width: 600px;">
+        <div style="text-align: center; margin-bottom: 2rem;">
+            <h1 style="color: var(--navy); font-weight: 700;">CREATE<span>ACCOUNT</span></h1>
+            <p style="color: #777;">Join us for an unforgettable luxury experience.</p>
+        </div>
+        
+        <form action="/register" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" placeholder="John Doe" required>
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" name="email" placeholder="john@example.com" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" placeholder="********" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="text" name="phone" placeholder="+91 XXXXX XXXXX" required>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label>Address</label>
+                <textarea name="address" rows="2" placeholder="Full address..." required></textarea>
+            </div>
+            
+            <div class="form-group">
+                <label>ID Proof Type</label>
+                <select name="id_proof" required>
+                    <option value="" disabled selected>Select ID Proof</option>
+                    <option value="Aadhar Card">Aadhar Card</option>
+                    <option value="Passport">Passport</option>
+                    <option value="Voter ID">Voter ID</option>
+                    <option value="Driving License">Driving License</option>
+                </select>
+            </div>
+            
+            <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 1rem;">Register Now</button>
+        </form>
+        
+        <p style="text-align: center; margin-top: 1.5rem;">
+            Already have an account? <a href="/login" style="color: var(--gold); text-decoration: none; font-weight: 600;">Login here</a>
+        </p>
+    </div>
+</div>
+{% endblock %}

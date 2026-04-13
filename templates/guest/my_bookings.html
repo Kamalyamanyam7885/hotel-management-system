@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <h2 style="margin-bottom: 2rem; color: var(--navy);">My Bookings</h2>
+    
+    <div class="table-container">
+        <table>
+            <thead>
+                <tr>
+                    <th>Booking ID</th>
+                    <th>Room</th>
+                    <th>Check-in</th>
+                    <th>Check-out</th>
+                    <th>Total</th>
+                    <th>Payment</th>
+                    <th>Status</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for booking in bookings %}
+                <tr>
+                    <td>#{{ booking.id }}</td>
+                    <td>Room {{ booking.room_number }} ({{ booking.room_type }})</td>
+                    <td>{{ booking.check_in }}</td>
+                    <td>{{ booking.check_out }}</td>
+                    <td>₹{{ booking.total_amount }}</td>
+                    <td><span class="badge {% if booking.payment_status == 'paid' %}badge-green{% else %}badge-orange{% endif %}">{{ booking.payment_status }}</span></td>
+                    <td><span class="badge {% if booking.status == 'confirmed' %}badge-green{% elif booking.status == 'cancelled' %}badge-red{% else %}badge-blue{% endif %}">{{ booking.status }}</span></td>
+                    <td>
+                        {% if booking.status == 'confirmed' and booking.payment_status == 'paid' %}
+                        <a href="/guest/receipt/{{ booking.id }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem; background: var(--navy); color: var(--gold); margin-right: 5px;">📄 Receipt</a>
+                        <form action="/guest/cancel/{{ booking.id }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-primary confirm-cancel" style="padding: 5px 10px; font-size: 0.8rem; background: var(--error);">Cancel</button>
+                        </form>
+                        {% elif booking.status == 'confirmed' %}
+                        <form action="/guest/cancel/{{ booking.id }}" method="POST" style="display:inline;">
+                            <button type="submit" class="btn btn-primary confirm-cancel" style="padding: 5px 10px; font-size: 0.8rem; background: var(--error);">Cancel</button>
+                        </form>
+                        {% elif booking.status == 'pending_payment' %}
+                        <a href="/guest/payment/{{ booking.id }}" class="btn btn-primary" style="padding: 5px 10px; font-size: 0.8rem;">Pay Now</a>
+                        {% elif booking.status == 'completed' and booking.payment_status == 'paid' %}
+                        <a href="/guest/receipt/{{ booking.id }}" class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;">📄 Receipt</a>
+                        {% else %}
+                        -
+                        {% endif %}
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,45 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <a href="/admin/dashboard" class="sidebar-link">Dashboard</a>
+        <a href="/admin/rooms" class="sidebar-link">Rooms</a>
+        <a href="/admin/staff" class="sidebar-link">Staff</a>
+        <a href="/admin/guests" class="sidebar-link active">Guests</a>
+        <a href="/admin/bookings" class="sidebar-link">Bookings</a>
+        <a href="/logout" class="sidebar-link">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <h2 style="margin-bottom: 2rem; color: var(--navy);">Guest List</h2>
+        
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                        <th>Address</th>
+                        <th>ID Proof</th>
+                        <th>Registered Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for guest in guests %}
+                    <tr>
+                        <td>{{ guest.name }}</td>
+                        <td>{{ guest.email }}</td>
+                        <td>{{ guest.phone }}</td>
+                        <td>{{ guest.address }}</td>
+                        <td>{{ guest.id_proof }}</td>
+                        <td>{{ guest.created_at.strftime('%Y-%m-%d') if guest.created_at else 'N/A' }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

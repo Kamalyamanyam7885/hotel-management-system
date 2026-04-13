@@ -1,0 +1,55 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <div style="text-align: center; margin-bottom: 3rem;">
+        <h2 style="color: var(--navy); font-size: 2rem;">Available Rooms</h2>
+        <div style="width: 60px; height: 3px; background: var(--gold); margin: 10px auto;"></div>
+    </div>
+
+    <div style="display: flex; justify-content: center; gap: 10px; margin-bottom: 3rem; flex-wrap: wrap;">
+        <button class="btn btn-outline filter-btn" data-type="all">All</button>
+        <button class="btn btn-outline filter-btn" data-type="Single">Single</button>
+        <button class="btn btn-outline filter-btn" data-type="Double">Double</button>
+        <button class="btn btn-outline filter-btn" data-type="Deluxe">Deluxe</button>
+        <button class="btn btn-outline filter-btn" data-type="Suite">Suite</button>
+    </div>
+
+    <style>
+        .room-img-wrapper { height: 200px; overflow: hidden; position: relative; }
+        .room-img-wrapper img { width: 100%; height: 100%; object-fit: cover; transition: transform 0.5s ease; }
+        .room-type-card:hover .room-img-wrapper img { transform: scale(1.08); }
+        .room-type-card { transition: transform 0.3s ease, box-shadow 0.3s ease; }
+        .room-type-card:hover { transform: translateY(-6px); box-shadow: 0 12px 30px rgba(0,0,0,0.15); }
+    </style>
+
+    <div class="room-grid">
+        {% for room in rooms %}
+        {% set room_images = {'Single': 'single.png', 'Double': 'double.png', 'Deluxe': 'deluxe.png', 'Suite': 'suite.png'} %}
+        <div class="room-type-card room-card" data-type="{{ room.type }}">
+            <div class="room-img-wrapper">
+                <img src="{{ url_for('static', filename='images/rooms/' + room_images.get(room.type, 'single.png')) }}" alt="{{ room.type }} Room">
+            </div>
+            <div class="room-info">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                    <h4 style="margin: 0;">{{ room.type }} Room #{{ room.room_number }}</h4>
+                    <span class="badge badge-gold" style="font-size: 0.7rem;">{{ room.type }}</span>
+                </div>
+                <p style="font-size: 0.9rem; color: #777; margin-bottom: 1rem;">Floor: {{ room.floor }} | Max Guests: {{ room.max_guests }}</p>
+                <div style="margin-bottom: 1rem;">
+                    {% if room.amenities %}
+                        {% for amenity in room.amenities.split(',') %}
+                            <span style="font-size: 0.75rem; background: #eee; padding: 2px 8px; border-radius: 4px; margin-right: 5px;">{{ amenity.strip() }}</span>
+                        {% endfor %}
+                    {% endif %}
+                </div>
+                <div style="display: flex; justify-content: space-between; align-items: center;">
+                    <p class="room-price">₹{{ room.price }}<span style="font-size: 0.8rem; font-weight: 400; color: #777;">/night</span></p>
+                    <a href="/guest/book/{{ room.id }}" class="btn btn-primary" style="padding: 5px 15px;">Book Now</a>
+                </div>
+            </div>
+        </div>
+        {% endfor %}
+    </div>
+</div>
+{% endblock %}

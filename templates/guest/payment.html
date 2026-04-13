@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="auth-container" style="max-width: 600px; margin: 50px auto;">
+    <div class="auth-card" style="text-align: center; padding: 3rem;">
+        <h2 style="color: var(--navy); margin-bottom: 1rem;">Complete Your Payment</h2>
+        <p style="color: var(--grey); margin-bottom: 2rem;">Please follow the instructions for your selected payment method.</p>
+        
+        <div class="booking-summary" style="background: #f8f9fa; padding: 1.5rem; border-radius: 10px; margin-bottom: 2rem; text-align: left;">
+            <h4 style="color: var(--navy); margin-bottom: 10px;">Booking Details</h4>
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; font-size: 0.9rem;">
+                <span><strong>Room:</strong> {{ booking.room_number }} ({{ booking.room_type }})</span>
+                <span><strong>Total Amount:</strong> <strong style="color: var(--gold); font-size: 1.2rem;">₹{{ booking.total_amount }}</strong></span>
+                <span><strong>Check-in:</strong> {{ booking.check_in }}</span>
+                <span><strong>Check-out:</strong> {{ booking.check_out }}</span>
+                <span><strong>Method:</strong> <span style="text-transform: uppercase; font-weight: bold; color: var(--navy);">{{ booking.payment_method }}</span></span>
+            </div>
+        </div>
+
+        {% if booking.payment_method in ['online', 'upi'] %}
+        <div class="payment-mode-container" id="upi_container">
+            <div class="qr-container" style="margin-bottom: 2rem; padding: 20px; border: 2px dashed var(--gold); border-radius: 15px; display: inline-block;">
+                <img src="https://api.qrserver.com/v1/create-qr-code/?size=250x250&data=upi://pay?pa=hotel@upi&pn=Hotel%20Management&am={{ booking.total_amount }}&cu=INR" alt="Payment QR Code" style="width: 250px; height: 250px;">
+            </div>
+            <p style="font-size: 0.8rem; color: var(--grey); margin-bottom: 2rem;">Scan the QR code above with any UPI app to pay.</p>
+        </div>
+        {% elif booking.payment_method == 'card' %}
+        <div class="payment-mode-container" id="card_container">
+            <div style="margin-bottom: 2rem; padding: 30px; background: #eee; border-radius: 15px; border: 1px solid #ccc;">
+                <!-- Card Swipe Machine Image Placeholder -->
+                <div style="font-size: 4rem; margin-bottom: 1rem;">💳</div>
+                <h4 style="color: var(--navy);">Insert / Swipe Your Card</h4>
+                <p style="font-size: 0.8rem; color: var(--grey);">Virtual terminal active...</p>
+            </div>
+            <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                <label>Enter 4-Digit PIN</label>
+                <input type="password" maxlength="4" placeholder="****" style="text-align: center; letter-spacing: 5px; font-size: 1.5rem;">
+            </div>
+        </div>
+        {% else %}
+        <div class="payment-mode-container">
+            <p style="margin-bottom: 2rem; font-weight: bold; color: var(--navy);">Please proceed to the reception for cash payment.</p>
+        </div>
+        {% endif %}
+
+        <form action="/guest/confirm_payment/{{ booking.id }}" method="POST">
+            {% if booking.payment_method in ['online', 'upi'] %}
+            <div class="form-group" style="margin-bottom: 1.5rem; text-align: left;">
+                <label>Transaction ID (Optional)</label>
+                <input type="text" name="transaction_id" placeholder="Enter Transaction ID">
+            </div>
+            {% endif %}
+            <button type="submit" class="btn btn-primary" style="width: 100%; padding: 1rem; font-size: 1.1rem; background: #28a745;">Payment Done - Booking Successful</button>
+        </form>
+        
+        <div style="margin-top: 1.5rem;">
+            <a href="/guest/mybookings" style="color: var(--grey); text-decoration: none; font-size: 0.9rem;">Back to My Bookings</a>
+        </div>
+    </div>
+</div>
+
+<style>
+    .auth-card {
+        background: rgba(255, 255, 255, 0.95);
+        border-radius: 20px;
+        box-shadow: 0 15px 35px rgba(0,0,0,0.1);
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+    }
+    .form-group input {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        background: white;
+    }
+</style>
+{% endblock %}

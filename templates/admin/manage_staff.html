@@ -1,0 +1,189 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="dashboard-container">
+    <div class="sidebar">
+        <a href="/admin/dashboard" class="sidebar-link">Dashboard</a>
+        <a href="/admin/rooms" class="sidebar-link">Rooms</a>
+        <a href="/admin/staff" class="sidebar-link active">Staff</a>
+        <a href="/admin/guests" class="sidebar-link">Guests</a>
+        <a href="/admin/bookings" class="sidebar-link">Bookings</a>
+        <a href="/logout" class="sidebar-link">Logout</a>
+    </div>
+
+    <div class="main-content">
+        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 2rem;">
+            <h2 style="color: var(--navy);">Manage Staff</h2>
+            <button class="btn btn-primary" onclick="document.getElementById('addStaffModal').style.display='block'">+ Add New Staff</button>
+        </div>
+
+        <div class="table-container">
+            <table>
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Role</th>
+                        <th>Department</th>
+                        <th>Salary</th>
+                        <th>Shift</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for member in staff %}
+                    <tr>
+                        <td>{{ member.name }}<br><small>{{ member.email }}</small></td>
+                        <td><span class="badge {% if member.role == 'manager' %}badge-gold{% elif member.role == 'receptionist' %}badge-blue{% elif member.role == 'housekeeping' %}badge-green{% else %}badge-red{% endif %}">{{ member.role }}</span></td>
+                        <td>{{ member.department }}</td>
+                        <td>₹{{ member.salary }}</td>
+                        <td>{{ member.shift }}</td>
+                        <td><span class="badge {% if member.status == 'active' %}badge-green{% else %}badge-grey{% endif %}">{{ member.status }}</span></td>
+                        <td>
+                            <button class="btn btn-outline" style="padding: 5px 10px; font-size: 0.8rem;" onclick="openEditModal({{ member | tojson }})">Edit</button>
+                            <form action="/admin/staff/delete/{{ member.id }}" method="POST" style="display:inline;">
+                                <button type="submit" class="btn btn-primary confirm-delete" style="padding: 5px 10px; font-size: 0.8rem; background: var(--error);">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Add Staff Modal -->
+<div id="addStaffModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1.5rem; color: var(--navy);">Add New Staff</h3>
+        <form action="/admin/staff" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" required>
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" name="password" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="role" required>
+                        <option value="receptionist">Receptionist</option>
+                        <option value="housekeeping">Housekeeping</option>
+                        <option value="manager">Manager</option>
+                        <option value="security">Security</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" name="department" required>
+                </div>
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="number" name="salary" required>
+                </div>
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select name="shift" required>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="night">Night</option>
+                    </select>
+                </div>
+            </div>
+            <div class="form-group">
+                <label>Joining Date</label>
+                <input type="date" name="joining_date" required>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Save Staff</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('addStaffModal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<!-- Edit Staff Modal -->
+<div id="editStaffModal" class="modal">
+    <div class="modal-content">
+        <h3 style="margin-bottom: 1.5rem; color: var(--navy);">Edit Staff</h3>
+        <form id="editStaffForm" method="POST">
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px;">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" name="name" id="edit_name" required>
+                </div>
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" name="email" id="edit_email" required>
+                </div>
+                <div class="form-group">
+                    <label>Phone</label>
+                    <input type="text" name="phone" id="edit_phone" required>
+                </div>
+                <div class="form-group">
+                    <label>Role</label>
+                    <select name="role" id="edit_staff_role" required>
+                        <option value="receptionist">Receptionist</option>
+                        <option value="housekeeping">Housekeeping</option>
+                        <option value="manager">Manager</option>
+                        <option value="security">Security</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Department</label>
+                    <input type="text" name="department" id="edit_department" required>
+                </div>
+                <div class="form-group">
+                    <label>Salary</label>
+                    <input type="number" name="salary" id="edit_salary" required>
+                </div>
+                <div class="form-group">
+                    <label>Shift</label>
+                    <select name="shift" id="edit_shift" required>
+                        <option value="morning">Morning</option>
+                        <option value="afternoon">Afternoon</option>
+                        <option value="night">Night</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>Status</label>
+                    <select name="status" id="edit_status" required>
+                        <option value="active">Active</option>
+                        <option value="inactive">Inactive</option>
+                    </select>
+                </div>
+            </div>
+            <div style="display: flex; gap: 10px; margin-top: 1rem;">
+                <button type="submit" class="btn btn-primary" style="flex: 1;">Update Staff</button>
+                <button type="button" class="btn btn-outline" style="flex: 1;" onclick="document.getElementById('editStaffModal').style.display='none'">Cancel</button>
+            </div>
+        </form>
+    </div>
+</div>
+
+<script>
+    function openEditModal(member) {
+        document.getElementById('editStaffForm').action = '/admin/staff/edit/' + member.id;
+        document.getElementById('edit_name').value = member.name;
+        document.getElementById('edit_email').value = member.email;
+        document.getElementById('edit_phone').value = member.phone;
+        document.getElementById('edit_staff_role').value = member.role;
+        document.getElementById('edit_department').value = member.department;
+        document.getElementById('edit_salary').value = member.salary;
+        document.getElementById('edit_shift').value = member.shift;
+        document.getElementById('edit_status').value = member.status;
+        document.getElementById('editStaffModal').style.display = 'block';
+    }
+</script>
+{% endblock %}

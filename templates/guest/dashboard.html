@@ -1,0 +1,26 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="main-content">
+    <div style="background: white; padding: 2.5rem; border-radius: 10px; box-shadow: 0 5px 15px rgba(0,0,0,0.05); margin-bottom: 2rem; border-left: 5px solid var(--gold);">
+        <h2 style="color: var(--navy);">Welcome back, {{ session.user_name }}!</h2>
+        <p style="color: #777;">We're delighted to have you stay with us. How can we help you today?</p>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <h3>Total Bookings</h3>
+            <div class="value">{{ total_bookings }}</div>
+        </div>
+        <div class="stat-card">
+            <h3>Active Bookings</h3>
+            <div class="value">{{ active_bookings }}</div>
+        </div>
+    </div>
+
+    <div style="display: flex; gap: 20px; margin-top: 2rem;">
+        <a href="/guest/rooms" class="btn btn-primary" style="flex: 1; text-align: center; padding: 1.5rem;">Browse Rooms</a>
+        <a href="/guest/mybookings" class="btn btn-outline" style="flex: 1; text-align: center; padding: 1.5rem;">My Bookings</a>
+    </div>
+</div>
+{% endblock %}
